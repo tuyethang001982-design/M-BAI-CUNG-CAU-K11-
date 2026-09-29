@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài Kiểm Tra Trắc Nghiệm - KTPL 11 Bài 2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-200">
+
+  <!-- Header & Sticky Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-white/95 dark:bg-gray-800/95 backdrop-blur border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-3">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-3">
+          <div class="bg-brand-600 text-white p-2 rounded-lg font-bold">
+            <i class="fa-solid fa-graduation-cap text-xl"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">
+              KTPL 11 - Bài 2: Cung - Cầu trong Kinh tế Thị trường
+            </h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Thời gian: 15 phút | Giới hạn: 1 lần làm bài</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Timer -->
+          <div id="timer-box" class="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 px-3 py-1.5 rounded-full font-mono text-sm font-semibold">
+            <i class="fa-regular fa-clock"></i>
+            <span id="timer-display">15:00</span>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button id="theme-toggle" class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm">
+            <i class="fa-solid fa-moon dark:hidden"></i>
+            <i class="fa-solid fa-sun hidden dark:block"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Question Jump Grid (Always visible at top) -->
+      <div class="pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1" id="nav-container">
+        <span class="text-xs font-semibold text-gray-500 whitespace-nowrap"><i class="fa-solid fa-list-check mr-1"></i>Câu hỏi:</span>
+        <div id="question-nav-grid" class="flex gap-1.5">
+          <!-- Generated JS -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- User Info Modal / Gate -->
+  <div id="user-info-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6 text-center border border-gray-100 dark:border-gray-700">
+      <div class="w-16 h-16 bg-brand-100 dark:bg-brand-900/50 text-brand-600 dark:text-brand-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+        <i class="fa-solid fa-user-graduate"></i>
+      </div>
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Thông Tin Học Sinh</h2>
+      <p class="text-sm text-gray-600 dark:text-gray-300 mb-6">
+        Vui lòng điền chính xác Họ tên và Lớp trước khi bắt đầu bài kiểm tra.
+      </p>
+
+      <form id="student-info-form" onsubmit="startQuiz(event)" class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase mb-1">Họ và Tên <span class="text-red-500">*</span></label>
+          <input type="text" id="input-fullname" required placeholder="Ví dụ: Nguyễn Văn A" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase mb-1">Lớp <span class="text-red-500">*</span></label>
+          <input type="text" id="input-class" required placeholder="Ví dụ: 11A1" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition">
+        </div>
+
+        <div class="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+          <span>Lưu ý: Mỗi học sinh chỉ được làm bài <strong>tối đa 1 lần</strong>. Kết quả sẽ được tự động gửi về hệ thống của giáo viên.</span>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-brand-500/20 transition duration-200 flex items-center justify-center gap-2">
+          <span>Bắt đầu làm bài</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto px-4 py-6">
+    <!-- Progress & Controls Bar -->
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <span>Học sinh:</span>
+          <span id="display-student-name" class="text-brand-600 dark:text-brand-400 font-bold">Chưa nhập</span>
+          <span class="text-gray-400">|</span>
+          <span>Lớp:</span>
+          <span id="display-student-class" class="text-brand-600 dark:text-brand-400 font-bold">Chưa nhập</span>
+        </div>
+        <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full mt-2 overflow-hidden w-64">
+          <div id="progress-bar" class="bg-brand-600 h-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="completion-status" class="text-xs font-semibold text-gray-500 dark:text-gray-400">Đã làm: 0/20 mục</span>
+        <button onclick="confirmSubmit()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow transition flex items-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>Nộp bài</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Alert for Submitted User -->
+    <div id="already-submitted-banner" class="hidden mb-6 p-4 bg-amber-100 dark:bg-amber-900/50 border border-amber-300 dark:border-amber-700 rounded-xl text-amber-900 dark:text-amber-200 text-sm font-medium flex items-center gap-3">
+      <i class="fa-solid fa-lock text-amber-600 dark:text-amber-400 text-xl"></i>
+      <div>
+        <strong>Bạn đã hoàn thành bài kiểm tra này!</strong>
+        <p class="text-xs mt-0.5 text-amber-800 dark:text-amber-300">Hệ thống đã ghi nhận điểm số của bạn. Bạn chỉ được phép làm bài 1 lần.</p>
+      </div>
+    </div>
+
+    <!-- Questions Container -->
+    <div id="questions-container" class="space-y-6">
+      <!-- Generated via JS -->
+    </div>
+
+    <!-- Bottom Submit Button -->
+    <div class="mt-8 mb-12 text-center">
+      <button onclick="confirmSubmit()" id="bottom-submit-btn" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-emerald-500/20 transition flex items-center gap-2 mx-auto">
+        <i class="fa-solid fa-check-circle"></i>
+        <span>Hoàn thành & Nộp bài</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- Result Modal -->
+  <div id="result-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 text-center border border-gray-100 dark:border-gray-700">
+      <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+        <i class="fa-solid fa-award"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Kết Quả Bài Kiểm Tra</h2>
+      <p id="result-student-info" class="text-sm text-gray-500 dark:text-gray-400 mb-4"></p>
+
+      <!-- Score Box -->
+      <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-200 dark:border-gray-600 mb-6">
+        <div class="text-4xl font-extrabold text-brand-600 dark:text-brand-400 mb-1" id="score-text">0.0 / 10</div>
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Điểm Số Của Bạn</div>
+        <div class="grid grid-cols-2 gap-2 text-xs border-t border-gray-200 dark:border-gray-600 pt-3">
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Số câu đúng:</span>
+            <span id="correct-count" class="font-bold text-emerald-600 dark:text-emerald-400 text-sm ml-1">0/20</span>
+          </div>
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Thời gian làm:</span>
+            <span id="time-taken" class="font-bold text-gray-800 dark:text-gray-200 text-sm ml-1">00:00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Google Form Post status -->
+      <div id="form-submit-status" class="mb-4 p-3 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+        <i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tự động gửi điểm lên Google Form...
+      </div>
+
+      <div class="space-y-3">
+        <!-- Backup Direct Link to Google Form if needed -->
+        <a id="backup-form-link" target="_blank" class="hidden w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span>Nộp kết quả trực tiếp lên Google Form (Dự phòng)</span>
+        </a>
+
+        <button onclick="closeResultModal()" class="w-full py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-semibold text-sm rounded-lg transition">
+          Xem lại bài làm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden iframe for background form submission -->
+  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+  <!-- Hidden Form targeting the iframe -->
+  <form id="google-form" action="https://docs.google.com/forms/d/e/1FAIpQLSdJ2WDi5SPqWFhy0dV30R9L0meo0Z8o1qNnBHTe6tmMvYlipg/formResponse" method="POST" target="hidden_iframe" class="hidden">
+    <input type="text" name="entry.1290166271" id="form-fullname">
+    <input type="text" name="entry.1009669281" id="form-class">
+    <input type="text" name="entry.1617877437" id="form-score">
+  </form>
+
+  <script>
+    // Original Raw Data
+    const rawQuestions = [
+      {
+        id: 1,
+        type: 'single',
+        question: 'Nhân tố nào sau đây không ảnh hưởng đến lượng cầu hàng hóa, dịch vụ trên thị trường?',
+        options: [
+          'Giá cả hàng hóa, dịch vụ.',
+          'Thu nhập của người tiêu dùng.',
+          'Số lượng người bán hàng hóa, dịch vụ.',
+          'Giá cả những hàng hóa, dịch vụ thay thế.'
+        ],
+        correct: 2
+      },
+      {
+        id: 2,
+        type: 'single',
+        question: 'Xác định nhân tố ảnh hưởng đến lượng cầu hàng hóa, dịch vụ trong trường hợp sau: Khi nền kinh tế tăng trưởng tốt, thu nhập bình quân của người dân tăng lên. Điều này làm cho cầu tiêu dùng hàng hoá, dịch vụ thông thường của họ cũng tăng lên. Tuy nhiên, khi các hoạt động kinh tế gặp khó khăn do tác động của thiên tai và sự bất ổn của thị trường thế giới, nền kinh tế rơi vào suy thoái. Hệ quả là nhiều người mất việc làm, mức thu nhập trung bình giảm xuống. Trong bối cảnh đó, người tiêu dùng phải cân nhắc hơn trước khi mua các hàng hoá, dịch vụ.',
+        options: [
+          'Thu nhập của người tiêu dùng.',
+          'Tâm lí, thị hiếu của người tiêu dùng.',
+          'Giá cả của hàng hóa, dịch vụ thay thế.',
+          'Dự đoán của người tiêu dùng về thị trường.'
+        ],
+        correct: 0
+      },
+      {
+        id: 3,
+        type: 'single',
+        question: 'Nhận định nào sau đây là đúng khi bàn về vấn đề: lượng cầu hàng hóa, dịch vụ trên thị trường?',
+        options: [
+          'Mọi nhu cầu của người tiêu dùng đều được coi là cầu.',
+          'Có nhiều nhân tố ảnh hưởng đến lượng cầu trên thị trường.',
+          'Quy mô dân số là nhân tố duy nhất ảnh hưởng đến lượng cầu.',
+          'Giá bán sản phẩm không ảnh hưởng gì đến lượng cầu hàng hóa.'
+        ],
+        correct: 1
+      },
+      {
+        id: 4,
+        type: 'single',
+        question: 'Trong nền kinh tế thị trường, cung và cầu có mối quan hệ như thế nào?',
+        options: [
+          'Tác động lẫn nhau.',
+          'Chỉ có cầu tác động đến cung.',
+          'Tồn tại độc lập với nhau.',
+          'Chỉ có cung tác động đến cầu.'
+        ],
+        correct: 0
+      },
+      {
+        id: 5,
+        type: 'single',
+        question: 'Trong nền kinh tế thị trường, lượng cung có tác động như thế nào đến lượng cầu hàng hóa, dịch vụ?',
+        options: [
+          'Kích thích lượng cầu.',
+          'Xác định cơ cấu của cầu.',
+          'Xác định khối lượng của cầu.',
+          'Không có tác động gì đến cầu.'
+        ],
+        correct: 0
+      },
+      {
+        id: 6,
+        type: 'single',
+        question: 'Điền từ/ cụm từ thích hợp vào chỗ trống (…) trong khái niệm sau: “….. là số lượng hàng hóa, dịch vụ mà nhà cung cấp sẵn sàng đáp ứng cho nhu cầu của thị trường với mức giá được xác định trong khoảng thời gian nhất định”.',
+        options: [
+          'cung.',
+          'cầu.',
+          'giá trị.',
+          'giá cả.'
+        ],
+        correct: 0
+      },
+      {
+        id: 7,
+        type: 'single',
+        question: 'Đọc trường hợp sau và trả lời câu hỏi: Vào thời điểm gần Tết Trung thu năm 2022, thị trường bánh trung thu trở nên sôi động. Nhu cầu đa dạng về chủng loại, mẫu mã bánh trung thu và xu thế tăng giá bán là những yếu tố thúc đẩy các nhà sản xuất tập trung nguồn lực cho sản phẩm này. Ngoài số doanh nghiệp sản xuất bánh kẹo với dây chuyền sản xuất hiện đại, công suất lớn chuyển sang làm bánh trung thu theo thời vụ, nhiều cơ sở sản xuất theo kiểu thủ công, qui mô nhỏ hơn, như các hộ cá thể trong các làng nghề truyền thống cũng gia nhập thị trường.\n\nLượng cung bánh Trung thu cho thị trường ở nước ta năm 2022 không bị ảnh hưởng bởi yếu tố nào sau đây?',
+        options: [
+          'Giá bán sản phẩm.',
+          'Chính sách của nhà nước.',
+          'Trình độ công nghệ sản xuất.',
+          'Số lượng người tham gia cung ứng.'
+        ],
+        correct: 1
+      },
+      {
+        id: 8,
+        type: 'single',
+        question: 'Lượng hàng hóa, dịch vụ mà người tiêu dùng sẵn sàng mua với một mức giá nhất định trong khoảng thời gian xác định được gọi là',
+        options: [
+          'cung.',
+          'cầu.',
+          'giá trị.',
+          'giá cả.'
+        ],
+        correct: 1
+      },
+      {
+        id: 9,
+        type: 'single',
+        question: 'Quan hệ cung - cầu có vai trò như thế nào đối với chủ thể nhà nước?',
+        options: [
+          'Là cơ sở để đưa ra các biện pháp góp phần bình ổn thị trường.',
+          'Là căn cứ để quyết định mở rộng hay thu hẹp quy mô sản xuất.',
+          'Là căn cứ giúp người dân lựa chọn việc mua hàng hóa phù hợp.',
+          'Là cơ sở để lập kế hoạch nhằm đầu cơ, tích trữ hàng hóa thiết yếu.'
+        ],
+        correct: 0
+      },
+      {
+        id: 10,
+        type: 'single',
+        question: 'Trong sản xuất và lưu thông hàng hóa, khi giá cả thị trường giảm xuống thì các doanh nghiệp thường có xu hướng',
+        options: [
+          'tăng giá trị cá biệt của hàng hóa.',
+          'mở rộng quy mô sản xuất.',
+          'tăng khối lượng cung hàng hóa.',
+          'thu hẹp quy mô sản xuất.'
+        ],
+        correct: 3
+      },
+      {
+        id: 11,
+        type: 'single',
+        question: 'Quan hệ cung - cầu có ảnh hưởng trực tiếp đến giá cả. Cụ thể: khi cung lớn hơn cầu, sẽ dẫn đến',
+        options: [
+          'giá cả hàng hóa, dịch vụ giảm.',
+          'giá cả hàng hóa, dịch vụ tăng.',
+          'giá cả hàng hóa, dịch vụ ổn định.',
+          'giá cả lúc tăng, lúc giảm, không ổn định.'
+        ],
+        correct: 0
+      },
+      {
+        id: 12,
+        type: 'single',
+        question: 'Nhà sản xuất, kinh doanh có thể thu được lợi nhuận cao, khi',
+        options: [
+          'cung lớn hơn cầu.',
+          'cung nhỏ hơn cầu.',
+          'cung bằng cầu.',
+          'không cung ứng sản phẩm.'
+        ],
+        correct: 1
+      },
+      {
+        id: 13,
+        type: 'single',
+        question: 'Khi cung nhỏ hơn cầu, giá cả tăng, chủ thể sản xuất có xu hướng',
+        options: [
+          'thu hẹp sản xuất.',
+          'mở rộng sản xuất.',
+          'sa thải bớt nhân công.',
+          'giảm lượng cung hàng hóa.'
+        ],
+        correct: 1
+      },
+      {
+        id: 14,
+        type: 'single',
+        question: 'Người tiêu dùng có xu hướng hạn chế/ mua ít hàng hóa, dịch vụ khi',
+        options: [
+          'cung lớn hơn cầu.',
+          'cung nhỏ hơn cầu.',
+          'cung bằng cầu.',
+          'giá cả hàng hóa giảm.'
+        ],
+        correct: 1
+      },
+      {
+        id: '15.1',
+        type: 'single',
+        question: 'Đọc thông tin: Trong những tháng đầu năm 2024, giá thanh long có nhiều biến động, nhiều hộ gia đình ở huyện T phá thanh long ruột trắng để trồng thanh long ruột đỏ do có giá cao hơn dao động từ 2000đ-3000đ/1kg.\n\nCâu 15.1. Việc chuyển đổi cây trồng thanh long là biểu hiện nào trong nội dung quan hệ cung – cầu?',
+        options: [
+          'Cung – cầu tác động lẫn nhau.',
+          'Cung – cầu ảnh hưởng đến giá cả thị trường.',
+          'Giá cả ảnh hưởng đến cung – cầu.',
+          'Cung lớn hơn cầu làm cho giá giảm'
+        ],
+        correct: 2
+      },
+      {
+        id: '15.2',
+        type: 'single',
+        question: 'Đọc thông tin: Trong những tháng đầu năm 2024, giá thanh long có nhiều biến động, nhiều hộ gia đình ở huyện T phá thanh long ruột trắng để trồng thanh long ruột đỏ do có giá cao hơn dao động từ 2000đ-3000đ/1kg.\n\nCâu 15.2. Người nông dân trồng thanh long ruột đỏ nhiều sẽ dẫn đến điều gì sau đây?',
+        options: [
+          'Cung tăng.',
+          'Cung giảm.',
+          'Cầu tăng.',
+          'Giá giảm.'
+        ],
+        correct: 0
+      },
+      {
+        id: 16,
+        type: 'tf',
+        question: 'Câu 16: Đọc đoạn thông tin sau:\n"Trong tháng 02/2024 đàn gia cầm trên cả nước phát triển tốt; các cơ sở chăn nuôi giữ ổn định quy mô, giá thức ăn chăn nuôi đã giảm đáng kể, giúp giảm bớt khó khăn cho hoạt động chăn nuôi nhất là ở các hộ chăn nuôi nhỏ lẻ. Nguồn cung thịt và trứng gia cầm đáp ứng đầy đủ cho thị trường. Tổng số gia cầm của cả nước tính đến thời điểm cuối tháng 2/2024 tăng 2,1% so với cùng thời điểm năm 2023."',
+        items: [
+          {
+            id: '16a',
+            text: 'a. Giá nguyên liệu là một trong các yếu tố ảnh hưởng trực tiếp đến việc mở rộng cơ sở chăn nuôi gia cầm.',
+            correct: true
+          },
+          {
+            id: '16b',
+            text: 'b. Cung là khối lượng gia cầm cung ứng trong thời gian nhất định.',
+            correct: true
+          },
+          {
+            id: '16c',
+            text: 'c. Trong thông tin trên, nguồn cung gia cầm tăng là do cơ sở gia cầm tăng cường chiến dịch quảng cáo.',
+            correct: false
+          },
+          {
+            id: '16d',
+            text: 'd. Trong thông tin trên, nguồn cung gia cầm tăng là do giá thịt gia cầm tăng cao.',
+            correct: false
+          }
+        ]
+      }
+    ];
+
+    // State
+    let studentInfo = { name: '', class: '' };
+    let processedQuestions = [];
+    let userAnswers = {}; // { qId: answer }
+    let isSubmitted = false;
+    let timerInterval = null;
+    let totalTimeSeconds = 15 * 60;
+    let timeElapsed = 0;
+
+    // Helper: Fisher-Yates Shuffle
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Initialize Questions with Shuffled Options
+    function prepareQuestions() {
+      processedQuestions = rawQuestions.map(q => {
+        if (q.type === 'single') {
+          const originalOptions = q.options.map((optText, idx) => ({
+            text: optText,
+            isCorrect: idx === q.correct
+          }));
+          const shuffled = shuffleArray(originalOptions);
+          return {
+            ...q,
+            shuffledOptions: shuffled
+          };
+        }
+        return q;
+      });
+    }
+
+    // On Load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Check local storage for previous submission
+      const savedAttempt = localStorage.getItem('ktpl11_quiz_submitted_v1');
+      
+      if (savedAttempt) {
+        const data = JSON.parse(savedAttempt);
+        studentInfo = data.studentInfo;
+        userAnswers = data.userAnswers;
+        isSubmitted = true;
+        timeElapsed = data.timeElapsed || 0;
+        processedQuestions = data.processedQuestions || rawQuestions;
+
+        document.getElementById('user-info-modal').classList.add('hidden');
+        document.getElementById('already-submitted-banner').classList.remove('hidden');
+        document.getElementById('display-student-name').textContent = studentInfo.name;
+        document.getElementById('display-student-class').textContent = studentInfo.class;
+        
+        renderNavGrid();
+        renderQuestions();
+        updateProgress();
+        showResults(true); // show cached results
+      } else {
+        prepareQuestions();
+        renderNavGrid();
+        renderQuestions();
+      }
+
+      // Dark Mode setup
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      }
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+      });
+    });
+
+    // Start Quiz
+    function startQuiz(e) {
+      e.preventDefault();
+      const name = document.getElementById('input-fullname').value.trim();
+      const className = document.getElementById('input-class').value.trim();
+
+      if (!name || !className) return;
+
+      studentInfo.name = name;
+      studentInfo.class = className;
+
+      document.getElementById('display-student-name').textContent = name;
+      document.getElementById('display-student-class').textContent = className;
+      document.getElementById('user-info-modal').classList.add('hidden');
+
+      startTimer();
+    }
+
+    // Timer
+    function startTimer() {
+      const timerDisplay = document.getElementById('timer-display');
+      timerInterval = setInterval(() => {
+        if (totalTimeSeconds <= 0) {
+          clearInterval(timerInterval);
+          alert('Đã hết thời gian làm bài! Hệ thống sẽ tự động nộp bài.');
+          submitQuiz();
+          return;
+        }
+        totalTimeSeconds--;
+        timeElapsed++;
+        
+        const m = Math.floor(totalTimeSeconds / 60).toString().padStart(2, '0');
+        const s = (totalTimeSeconds % 60).toString().padStart(2, '0');
+        timerDisplay.textContent = `${m}:${s}`;
+      }, 1000);
+    }
+
+    // Render Navigation Buttons at Top
+    function renderNavGrid() {
+      const navContainer = document.getElementById('question-nav-grid');
+      navContainer.innerHTML = '';
+
+      let index = 1;
+      processedQuestions.forEach((q) => {
+        if (q.type === 'single') {
+          const btn = document.createElement('button');
+          btn.id = `nav-btn-${q.id}`;
+          btn.className = `w-7 h-7 text-xs font-semibold rounded-md border transition flex items-center justify-center border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100`;
+          btn.textContent = index;
+          btn.onclick = () => scrollToQuestion(`q-card-${q.id}`);
+          navContainer.appendChild(btn);
+          index++;
+        } else if (q.type === 'tf') {
+          q.items.forEach(item => {
+            const btn = document.createElement('button');
+            btn.id = `nav-btn-${item.id}`;
+            btn.className = `w-7 h-7 text-xs font-semibold rounded-md border transition flex items-center justify-center border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100`;
+            btn.textContent = item.id.replace('16', '16.');
+            btn.onclick = () => scrollToQuestion(`q-card-${q.id}`);
+            navContainer.appendChild(btn);
+          });
+        }
+      });
+    }
+
+    function scrollToQuestion(elementId) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        const offset = 120;
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = el.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    // Render Questions
+    function renderQuestions() {
+      const container = document.getElementById('questions-container');
+      container.innerHTML = '';
+
+      let questionNumberCounter = 1;
+
+      processedQuestions.forEach((q) => {
+        const card = document.createElement('div');
+        card.id = `q-card-${q.id}`;
+        card.className = "bg-white dark:bg-gray-800 p-5 md:p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 transition";
+
+        if (q.type === 'single') {
+          const qNum = questionNumberCounter++;
+          
+          card.innerHTML = `
+            <div class="flex items-start gap-3 mb-4">
+              <span class="bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 font-bold px-2.5 py-1 rounded-lg text-sm whitespace-nowrap">
+                Câu ${qNum}
+              </span>
+              <div class="text-gray-900 dark:text-gray-100 font-medium text-base leading-relaxed whitespace-pre-line">
+                ${q.question}
+              </div>
+            </div>
+
+            <div class="space-y-2.5 ml-0 md:ml-2">
+              ${q.shuffledOptions.map((opt, optIdx) => {
+                const checked = userAnswers[q.id] === optIdx ? 'checked' : '';
+                return `
+                  <label class="option-label flex items-start gap-3 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition relative ${isSubmitted ? 'pointer-events-none' : ''}">
+                    <input type="radio" name="q-${q.id}" value="${optIdx}" ${checked} onchange="selectSingleAnswer('${q.id}',${optIdx})" class="mt-1 w-4 h-4 text-brand-600 focus:ring-brand-500 border-gray-300 dark:border-gray-600">
+                    <span class="text-sm text-gray-700 dark:text-gray-200 leading-normal flex-1">${opt.text}</span>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+
+            <div id="status-badge-${q.id}" class="mt-3 hidden"></div>
+          `;
+        } else if (q.type === 'tf') {
+          card.innerHTML = `
+            <div class="flex items-start gap-3 mb-4">
+              <span class="bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-bold px-2.5 py-1 rounded-lg text-sm whitespace-nowrap">
+                Câu 16
+              </span>
+              <div class="text-gray-900 dark:text-gray-100 font-medium text-base leading-relaxed whitespace-pre-line">
+                ${q.question}
+              </div>
+            </div>
+
+            <div class="space-y-4 border-t border-gray-100 dark:border-gray-700 pt-4">
+              ${q.items.map(item => {
+                const val = userAnswers[item.id];
+                return `
+                  <div class="p-3 bg-gray-50 dark:bg-gray-750 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">${item.text}</p>
+                    <div class="flex items-center gap-6">
+                      <label class="inline-flex items-center gap-2 cursor-pointer ${isSubmitted ? 'pointer-events-none' : ''}">
+                        <input type="radio" name="q-${item.id}" value="true" ${val === true ? 'checked' : ''} onchange="selectTFAnswer('${item.id}', true)" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+                        <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Đúng</span>
+                      </label>
+                      <label class="inline-flex items-center gap-2 cursor-pointer ${isSubmitted ? 'pointer-events-none' : ''}">
+                        <input type="radio" name="q-${item.id}" value="false" ${val === false ? 'checked' : ''} onchange="selectTFAnswer('${item.id}', false)" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+                        <span class="text-sm font-semibold text-rose-600 dark:text-rose-400">Sai</span>
+                      </label>
+                    </div>
+                    <div id="status-badge-${item.id}" class="mt-2 hidden"></div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+
+        container.appendChild(card);
+      });
+
+      if (isSubmitted) {
+        applyReviewStyles();
+      }
+    }
+
+    // Answer Selection Handlers
+    function selectSingleAnswer(qId, optionIndex) {
+      if (isSubmitted) return;
+      userAnswers[qId] = optionIndex;
+      updateNavState(`nav-btn-${qId}`, true);
+      updateProgress();
+    }
+
+    function selectTFAnswer(itemId, boolVal) {
+      if (isSubmitted) return;
+      userAnswers[itemId] = boolVal;
+      updateNavState(`nav-btn-${itemId}`, true);
+      updateProgress();
+    }
+
+    function updateNavState(btnId, isAnswered) {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        if (isAnswered) {
+          btn.className = "w-7 h-7 text-xs font-bold rounded-md bg-brand-600 text-white border border-brand-600 transition flex items-center justify-center";
+        } else {
+          btn.className = "w-7 h-7 text-xs font-semibold rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 flex items-center justify-center";
+        }
+      }
+    }
+
+    function updateProgress() {
+      const totalItems = 20; // 15 single + 4 TF items
+      const answeredCount = Object.keys(userAnswers).length;
+      const pct = Math.round((answeredCount / totalItems) * 100);
+
+      document.getElementById('progress-bar').style.width = `${pct}%`;
+      document.getElementById('completion-status').textContent = `Đã làm: ${answeredCount}/${totalItems} mục`;
+    }
+
+    // Confirmation & Submission
+    function confirmSubmit() {
+      if (isSubmitted) {
+        showResults(true);
+        return;
+      }
+
+      const totalItems = 20;
+      const answeredCount = Object.keys(userAnswers).length;
+
+      if (answeredCount < totalItems) {
+        if (!confirm(`Bạn mới trả lời ${answeredCount}/${totalItems} mục. Bạn có chắc chắn muốn nộp bài sớm không?`)) {
+          return;
+        }
+      } else {
+        if (!confirm("Bạn có chắc chắn muốn nộp bài kiểm tra?")) {
+          return;
+        }
+      }
+
+      submitQuiz();
+    }
+
+    function submitQuiz() {
+      if (timerInterval) clearInterval(timerInterval);
+      isSubmitted = true;
+
+      // Calculate Score
+      let correctTotal = 0;
+
+      processedQuestions.forEach(q => {
+        if (q.type === 'single') {
+          const userChoiceIdx = userAnswers[q.id];
+          if (userChoiceIdx !== undefined && q.shuffledOptions[userChoiceIdx].isCorrect) {
+            correctTotal++;
+          }
+        } else if (q.type === 'tf') {
+          q.items.forEach(item => {
+            const userChoice = userAnswers[item.id];
+            if (userChoice !== undefined && userChoice === item.correct) {
+              correctTotal++;
+            }
+          });
+        }
+      });
+
+      const score10 = ((correctTotal / 20) * 10).toFixed(1);
+
+      // Save state to localStorage to prevent retaking
+      const payload = {
+        studentInfo,
+        userAnswers,
+        score: score10,
+        correctTotal,
+        timeElapsed,
+        processedQuestions
+      };
+      localStorage.setItem('ktpl11_quiz_submitted_v1', JSON.stringify(payload));
+
+      // Post to Google Form automatically via hidden iframe
+      sendDataToGoogleForm(studentInfo.name, studentInfo.class, `${score10}/10 (Đúng ${correctTotal}/20 câu)`);
+
+      // UI updates
+      document.getElementById('already-submitted-banner').classList.remove('hidden');
+      document.getElementById('bottom-submit-btn').classList.add('hidden');
+      applyReviewStyles();
+      showResults(false);
+    }
+
+    function sendDataToGoogleForm(fullname, className, scoreStr) {
+      document.getElementById('form-fullname').value = fullname;
+      document.getElementById('form-class').value = className;
+      document.getElementById('form-score').value = scoreStr;
+
+      // Submit hidden form
+      document.getElementById('google-form').submit();
+
+      // Update backup direct link
+      const prefilledUrl = `https://docs.google.com/forms/d/e/1FAIpQLSdJ2WDi5SPqWFhy0dV30R9L0meo0Z8o1qNnBHTe6tmMvYlipg/viewform?usp=pp_url&entry.1290166271=${encodeURIComponent(fullname)}&entry.1009669281=${encodeURIComponent(className)}&entry.1617877437=${encodeURIComponent(scoreStr)}`;
+      const backupBtn = document.getElementById('backup-form-link');
+      backupBtn.href = prefilledUrl;
+
+      setTimeout(() => {
+        const statusBox = document.getElementById('form-submit-status');
+        if (statusBox) {
+          statusBox.className = "mb-4 p-3 rounded-lg text-xs font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center gap-1.5";
+          statusBox.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500"></i> Kết quả đã được gửi tự động lên hệ thống!';
+        }
+        backupBtn.classList.remove('hidden');
+      }, 1500);
+    }
+
+    function applyReviewStyles() {
+      // Show correct / incorrect badges WITHOUT revealing the correct option
+      processedQuestions.forEach(q => {
+        if (q.type === 'single') {
+          const badgeContainer = document.getElementById(`status-badge-${q.id}`);
+          const userChoiceIdx = userAnswers[q.id];
+          if (badgeContainer) {
+            badgeContainer.classList.remove('hidden');
+            if (userChoiceIdx !== undefined) {
+              const isCorrect = q.shuffledOptions[userChoiceIdx].isCorrect;
+              badgeContainer.innerHTML = isCorrect
+                ? `<span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"><i class="fa-solid fa-check"></i> Bạn đã trả lời CHÍNH XÁC</span>`
+                : `<span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300"><i class="fa-solid fa-xmark"></i> Câu trả lời CHƯA CHÍNH XÁC</span>`;
+            } else {
+              badgeContainer.innerHTML = `<span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"><i class="fa-solid fa-minus"></i> Chưa trả lời</span>`;
+            }
+          }
+        } else if (q.type === 'tf') {
+          q.items.forEach(item => {
+            const badgeContainer = document.getElementById(`status-badge-${item.id}`);
+            const userChoice = userAnswers[item.id];
+            if (badgeContainer) {
+              badgeContainer.classList.remove('hidden');
+              if (userChoice !== undefined) {
+                const isCorrect = userChoice === item.correct;
+                badgeContainer.innerHTML = isCorrect
+                  ? `<span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400"><i class="fa-solid fa-check"></i> Chính xác</span>`
+                  : `<span class="inline-flex items-center gap-1 text-xs font-bold text-rose-600 dark:text-rose-400"><i class="fa-solid fa-xmark"></i> Chưa chính xác</span>`;
+              } else {
+                badgeContainer.innerHTML = `<span class="text-xs text-gray-400">Bỏ trống</span>`;
+              }
+            }
+          });
+        }
+      });
+    }
+
+    function showResults(fromCache = false) {
+      let correctTotal = 0;
+      processedQuestions.forEach(q => {
+        if (q.type === 'single') {
+          const userChoiceIdx = userAnswers[q.id];
+          if (userChoiceIdx !== undefined && q.shuffledOptions[userChoiceIdx].isCorrect) {
+            correctTotal++;
+          }
+        } else if (q.type === 'tf') {
+          q.items.forEach(item => {
+            const userChoice = userAnswers[item.id];
+            if (userChoice !== undefined && userChoice === item.correct) {
+              correctTotal++;
+            }
+          });
+        }
+      });
+
+      const score10 = ((correctTotal / 20) * 10).toFixed(1);
+      
+      document.getElementById('score-text').textContent = `${score10} / 10`;
+      document.getElementById('correct-count').textContent = `${correctTotal}/20`;
+
+      const m = Math.floor(timeElapsed / 60).toString().padStart(2, '0');
+      const s = (timeElapsed % 60).toString().padStart(2, '0');
+      document.getElementById('time-taken').textContent = `${m}:${s}`;
+
+      document.getElementById('result-student-info').textContent = `Học sinh: ${studentInfo.name} - Lớp: ${studentInfo.class}`;
+
+      if (fromCache) {
+        const statusBox = document.getElementById('form-submit-status');
+        if (statusBox) {
+          statusBox.className = "mb-4 p-3 rounded-lg text-xs font-medium bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center gap-1.5";
+          statusBox.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500"></i> Bài làm đã nộp thành công trước đó.';
+        }
+      }
+
+      document.getElementById('result-modal').classList.remove('hidden');
+    }
+
+    function closeResultModal() {
+      document.getElementById('result-modal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
